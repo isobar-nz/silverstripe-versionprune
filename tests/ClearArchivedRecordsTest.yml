@@ -1,0 +1,54 @@
+# base records
+CART_BaseRecord:
+  pagea:
+    ID: 10
+    Title: 'Page A'
+  pageb:
+    ID: 11
+    Title: 'Page B'
+
+# Note: Trim to 2 versions, so only need 3
+CART_BaseRecord_Versions:
+  pagea_version1: # Should be deleted if keepVersions = 2
+    ID: 1
+    RecordID: 10
+    Version: 1
+  pagea_version2:
+    ID: 2
+    RecordID: 10
+    Version: 2
+  pagea_version3:
+    ID: 3
+    RecordID: 10
+    Version: 3
+  pagez_orphan:
+    ID: 4
+    RecordID: 111
+    Version: 1
+
+
+CART_ChildRecord_Versions:
+  ppagea_version1:
+    ID: 1
+    RecordID: 10
+    Version: 1
+  ppagea_version2:
+    ID: 2
+    RecordID: 10
+    Version: 2
+  ppagea_version3:
+    ID: 3
+    RecordID: 10
+    Version: 3
+  ppagea_version4: # Orphan: No parent version 4
+    ID: 7
+    RecordID: 10
+    Version: 4
+  ppagez_orphan: # Orphan: No base record, but there is parent version 4
+    ID: 4
+    RecordID: 111
+    Version: 1
+  ppagex_orphan: # Orphan: no base record or parent version 2
+    ID: 6
+    RecordID: 112
+    Version: 2

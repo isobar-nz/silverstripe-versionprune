@@ -1,0 +1,22 @@
+{
+    "name": "isobar-nz/silverstripe-versionprune",
+    "description": "Clear up old versioned records",
+    "type": "silverstripe-vendormodule",
+    "require": {
+        "silverstripe/versioned": "^4"
+    },
+    "license": "BSD-3-Clause",
+    "authors": [
+        {
+            "name": "Damian Mooyman",
+            "email": "damian.mooyman@isobar.com"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "IsobarNZ\\VersionPrune\\": "src/",
+            "IsobarNZ\\VersionPrune\\Tests\\": "tests/"
+        }
+    },
+    "minimum-stability": "dev"
+}
