@@ -3,7 +3,7 @@
     "description": "Clear up old versioned records",
     "type": "silverstripe-vendormodule",
     "require": {
-        "silverstripe/versioned": "^4"
+        "silverstripe/versioned": "^4 || ^1"
     },
     "license": "BSD-3-Clause",
     "authors": [
