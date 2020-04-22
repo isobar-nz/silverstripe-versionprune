@@ -2,9 +2,9 @@
 
 namespace IsobarNZ\VersionPrune\Tests\Tasks;
 
-use App\Tasks\ClearArchivedRecords;
-use App\Tests\Tasks\ClearArchivedRecordsTest\BaseRecord;
-use App\Tests\Tasks\ClearArchivedRecordsTest\ChildRecord;
+use IsobarNZ\VersionPrune\Tasks\ClearArchivedRecords;
+use IsobarNZ\VersionPrune\Tests\Tasks\ClearArchivedRecordsTest\BaseRecord;
+use IsobarNZ\VersionPrune\Tests\Tasks\ClearArchivedRecordsTest\ChildRecord;
 use SilverStripe\Dev\SapphireTest;
 use SilverStripe\ORM\DB;
 
@@ -26,9 +26,9 @@ class ClearArchivedRecordsTest extends SapphireTest
         ob_start();
         $task = ClearArchivedRecords::create();
         $task->setKeepVersions(2);
+        $task->deleteOldVersions(BaseRecord::class);
         ob_end_clean();
 
-        $task->deleteOldVersions(BaseRecord::class);
         $this->assertPageHasCountVersions(10, 2);
         $this->assertPageHasVersion(10, 2);
         $this->assertPageHasVersion(10, 3);
