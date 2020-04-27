@@ -4,10 +4,12 @@ namespace IsobarNZ\VersionPrune\Tasks;
 
 use Generator;
 use InvalidArgumentException;
+use ReflectionException;
 use SilverStripe\Control\Director;
 use SilverStripe\Control\HTTPRequest;
 use SilverStripe\Core\ClassInfo;
 use SilverStripe\Core\Convert;
+use SilverStripe\Core\Environment;
 use SilverStripe\Dev\BuildTask;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\ORM\DB;
@@ -55,9 +57,13 @@ DESCRIPTION;
 
     /**
      * @param HTTPRequest $request
+     * @throws ReflectionException
      */
     public function run($request)
     {
+        Environment::increaseTimeLimitTo();
+        Environment::increaseMemoryLimitTo();
+
         $run = $request->getVar('run');
         $this->setDry($run === 'dry');
         if (!in_array($run, ['dry', 'yes'])) {
@@ -79,6 +85,7 @@ DESCRIPTION;
      * Get all base classess with versioned
      *
      * @return Generator|string []
+     * @throws ReflectionException
      */
     protected function getBaseClasses()
     {
@@ -94,6 +101,7 @@ DESCRIPTION;
      *
      * @param string $class
      * @return Generator|string[]
+     * @throws ReflectionException
      */
     protected function directSubclasses($class)
     {
@@ -153,7 +161,7 @@ DESCRIPTION;
 
         // Clear all except keepVersions num of max versions
         $clearedVersionCounts = 0;
-        foreach (Versioned::get_by_stage($class, Versioned::DRAFT) as $object) {
+        foreach ($this->getDraftObjects($class) as $object) {
             // Get version to keep
             $versionBound = DB::prepared_query(<<<SQL
 SELECT "Version" FROM "{$baseVersionedTable}"
@@ -319,5 +327,33 @@ JOIN
     {
         $this->dry = $dry;
         return $this;
+    }
+
+    /**
+     * Get draft records in list
+     *
+     * @param string $class
+     * @return Generator|DataObject[]
+     */
+    protected function getDraftObjects(string $class)
+    {
+        // Batch all queries into groups of 100 records
+        $allRecords = Versioned::get_by_stage($class, Versioned::DRAFT);
+        $count = $allRecords->count();
+        $batches = (int)($count / 100) + 1;
+        for ($batch = 0; $batch < $batches; $batch++) {
+            $batchRecords = $allRecords->where([
+                'MOD("ID", ?) = ?' => [
+                    $batches,
+                    $batch,
+                ],
+            ]);
+            foreach ($batchRecords as $record) {
+                yield $record;
+            }
+
+            // Flush records
+            gc_collect_cycles();
+        }
     }
 }
