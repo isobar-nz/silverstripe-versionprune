@@ -9,6 +9,7 @@ use SilverStripe\Control\Director;
 use SilverStripe\Control\HTTPRequest;
 use SilverStripe\Core\ClassInfo;
 use SilverStripe\Core\Convert;
+use SilverStripe\Core\Environment;
 use SilverStripe\Dev\BuildTask;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\ORM\DB;
@@ -60,6 +61,9 @@ DESCRIPTION;
      */
     public function run($request)
     {
+        Environment::increaseTimeLimitTo();
+        Environment::increaseMemoryLimitTo();
+
         $run = $request->getVar('run');
         $this->setDry($run === 'dry');
         if (!in_array($run, ['dry', 'yes'])) {
