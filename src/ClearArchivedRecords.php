@@ -56,6 +56,13 @@ DESCRIPTION;
     protected $dry = false;
 
     /**
+     * True to skip slow tasks and just do orphan cleanup
+     *
+     * @var bool
+     */
+    protected $fast = false;
+
+    /**
      * @param HTTPRequest $request
      * @throws ReflectionException
      */
@@ -65,10 +72,11 @@ DESCRIPTION;
         Environment::increaseMemoryLimitTo();
 
         $run = $request->getVar('run');
-        $this->setDry($run === 'dry');
-        if (!in_array($run, ['dry', 'yes'])) {
-            throw new InvalidArgumentException("Please provide the 'run' argument with either 'yes' or 'dry'");
+        if (!in_array($run, ['dry', 'yes', 'fast'])) {
+            throw new InvalidArgumentException("Please provide the 'run' argument with either 'yes', 'dry', or 'fast'");
         }
+        $this->setDry($run === 'dry');
+        $this->setFast($run === 'fast');
 
         // Set keep versions
         $this->setKeepVersions($request->getVar('keep') ?: self::DEFAULT_KEEP_VERSIONS);
@@ -121,8 +129,10 @@ DESCRIPTION;
     {
         $this->message("Beginning flush for {$class}");
 
-        // Delete old versions for non-deleted records
-        $this->deleteOldVersions($class);
+        // Delete old versions for non-deleted records (note: Can be slow on large recordsets)
+        if (!$this->isFast()) {
+            $this->deleteOldVersions($class);
+        }
 
         // Clear all obsolete versions for deleted records
         $this->deleteArchivedVersions($class);
@@ -326,6 +336,24 @@ JOIN
     public function setDry(bool $dry): self
     {
         $this->dry = $dry;
+        return $this;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isFast(): bool
+    {
+        return $this->fast;
+    }
+
+    /**
+     * @param bool $fast
+     * @return $this
+     */
+    public function setFast(bool $fast): self
+    {
+        $this->fast = $fast;
         return $this;
     }
 
