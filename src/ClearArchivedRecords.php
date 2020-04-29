@@ -68,15 +68,18 @@ DESCRIPTION;
      */
     public function run($request)
     {
-        Environment::increaseTimeLimitTo();
-        Environment::increaseMemoryLimitTo();
-
         $run = $request->getVar('run');
         if (!in_array($run, ['dry', 'yes', 'fast'])) {
             throw new InvalidArgumentException("Please provide the 'run' argument with either 'yes', 'dry', or 'fast'");
         }
         $this->setDry($run === 'dry');
         $this->setFast($run === 'fast');
+
+        // With slow requests, need to increase time limit to 1 hour
+        if (!$this->isFast() && !$this->isDry()) {
+            Environment::increaseTimeLimitTo(3600);
+            Environment::increaseMemoryLimitTo();
+        }
 
         // Set keep versions
         $this->setKeepVersions($request->getVar('keep') ?: self::DEFAULT_KEEP_VERSIONS);
